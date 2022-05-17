@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>シャドバ対戦管理</title>
+  <link th:href="@{/webjars/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet" >
+  <link th:href="@{/css/board.css}" rel="stylesheet" type="text/css">
+  <script src="webjars/jquery/3.5.1/jquery.min.js"></script>
+  <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+  <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+  <script type="text/javascript">
+$(function() {
+	const socket = new SockJS('/point1');
+	stompClient = Stomp.over(socket);
+	stompClient.connect({}, function (frame) {
+		//コールバック関数
+		stompClient.subscribe('/topic/client1', function (result) {
+			var obj = JSON.parse(result.body);
+			if (obj.fHp) $('#fHp').text(obj.fHp);
+			if (obj.fEp) $('#fEp').text(obj.fEp);
+			if (obj.fMax) $('#fMax').text(obj.fMax);
+			if (obj.fPp) $('#fPp').text(obj.fPp);
+			if (obj.fHand) $('#fHand').text(obj.fHand);
+			if (obj.fSc) $('#fSc').text(obj.fSc);
+			if (obj.fNc) $('#fNc').text(obj.fNc);
+			if (obj.fComb) $('#fComb').text(obj.fComb);
+			
+			if (obj.sHp) $('#sHp').text(obj.sHp);
+			if (obj.sEp) $('#sEp').text(obj.sEp);
+			if (obj.sMax) $('#sMax').text(obj.sMax);
+			if (obj.sPp) $('#sPp').text(obj.sPp);
+			if (obj.sHand) $('#sHand').text(obj.sHand);
+			if (obj.sSc) $('#sSc').text(obj.sSc);
+			if (obj.sNc) $('#sNc').text(obj.sNc);
+			if (obj.sComb) $('#sComb').text(obj.sComb);
+			
+			if (obj.turn) {
+				if (obj.turn == 1) {
+					// 先行
+					$('#first').css('border-width', '10px');
+					$('#second').css('border-width', '0px');
+				} else {
+					// 後攻
+					$('#first').css('border-width', '0px');
+					$('#second').css('border-width', '10px');
+				}
+			}
+		});
+	});
+	if ($('#turn').val() == 1) {
+		// 先行ターン
+		$('#first').css('border-width', '10px');
+		$('#second').css('border-width', '0px');
+	} else {
+		// 後攻ターン
+		$('#first').css('border-width', '0px');
+		$('#second').css('border-width', '10px');
+	}
+});
+  </script>
+</head>
+<body>
+	<input type="hidden" id="turn" th:value="${boardForm.turn}"></inputhidden>
+	
+	<div class="card" style="margin: 1em 0 1em 0;">
+		<button type="button" class="btn btn-danger" onclick="stompClient.send('/app/reset', {}, 'x');">リセット</button>
+	</div>
+	<div style="clear:both;"></div>
+	
+	<div id="first" class="card" style="width: 18rem;color: #4a86e8;background-color:aliceblue">
+		<h1>先行</h1>
+		<div class="card-body">
+			<table>
+				<tbody>
+					<tr>
+						<td	width="100"><img th:src="@{/images/HP.png}" alt="HP" width="50" height="50"></td>
+						<td><button id="fHpMinus" type="button" class="btn btn-danger" onclick="stompClient.send('/app/fHpMinus', {}, 'x');">-</button></td>
+						<td width="100"><span id='fHp' th:text="${boardForm.fHp}"></span></td>
+						<td><button id="fHpAdd" type="button" class="btn btn-success" onclick="stompClient.send('/app/fHpPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/EP.png}" alt="EP" width="50" height="50"></td>
+						<td><!--<button type="button" class="btn btn-danger" onclick="stompClient.send('/app/fEpMinus', {}, 'x');">-</button>--></td>
+						<td><span id='fEp' th:text="${boardForm.fEp}"></span></td>
+						<td><!--<button type="button" class="btn btn-success" onclick="stompClient.send('/app/fEpPlus', {}, 'x');">+</button>--></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/MAX.png}" alt="Max PP" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/fMaxMinus', {}, 'x');">-</button></td>
+						<td><span id='fMax' th:text="${boardForm.fMax}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/fMaxPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/PP.png}" alt="PP" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/fPpMinus', {}, 'x');">-</button></td>
+						<td><span id='fPp' th:text="${boardForm.fPp}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/fPpPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/hand.png}" alt="手札枚数" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/fHandMinus', {}, 'x');">-</button></td>
+						<td><span id='fHand' th:text="${boardForm.fHand}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/fHandPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/SC.png}" alt="スペルチェイン" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/fScMinus', {}, 'x');">-</button></td>
+						<td><span id='fSc' th:text="${boardForm.fSc}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/fScPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/NC.png}" alt="ネクロチャージ" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/fNcMinus', {}, 'x');">-</button></td>
+						<td><span id='fNc' th:text="${boardForm.fNc}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/fNcPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/comb.png}" alt="コンボ" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/fCombMinus', {}, 'x');">-</button></td>
+						<td><span id='fComb' th:text="${boardForm.fComb}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/fCombPlus', {}, 'x');">+</button></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+
+	<div id="second" class="card" style="width: 18rem;color: #ff6d01;background-color:#fff2cc">
+		<h1>後攻</h1>
+		<div class="card-body">
+			<table>
+				<tbody>
+					<tr>
+						<td	width="100"><img th:src="@{/images/HP.png}" alt="HP" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sHpMinus', {}, 'x');">-</button></td>
+						<td width="100"><span id='sHp' th:text="${boardForm.sHp}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sHpPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/EP.png}" alt="EP" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sEpMinus', {}, 'x');">-</button></td>
+						<td><span id='sEp' th:text="${boardForm.sEp}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sEpPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/MAX.png}" alt="Max PP" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sMaxMinus', {}, 'x');">-</button></td>
+						<td><span id='sMax' th:text="${boardForm.sMax}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sMaxPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/PP.png}" alt="PP" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sPpMinus', {}, 'x');">-</button></td>
+						<td><span id='sPp' th:text="${boardForm.sPp}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sPpPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/hand.png}" alt="手札枚数" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sHandMinus', {}, 'x');">-</button></td>
+						<td><span id='sHand' th:text="${boardForm.sHand}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sHandPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/SC.png}" alt="スペルチェイン" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sScMinus', {}, 'x');">-</button></td>
+						<td><span id='sSc' th:text="${boardForm.sSc}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sScPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/NC.png}" alt="ネクロチャージ" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sNcMinus', {}, 'x');">-</button></td>
+						<td><span id='sNc' th:text="${boardForm.sNc}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sNcPlus', {}, 'x');">+</button></td>
+					</tr>
+					<tr>
+						<td><img th:src="@{/images/comb.png}" alt="コンボ" width="50" height="50"></td>
+						<td><button type="button" class="btn btn-danger" onclick="stompClient.send('/app/sCombMinus', {}, 'x');">-</button></td>
+						<td><span id='sComb' th:text="${boardForm.sComb}"></span></td>
+						<td><button type="button" class="btn btn-success" onclick="stompClient.send('/app/sCombPlus', {}, 'x');">+</button></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<div class="card" style="clear: both;margin-top: 1em;">
+		<button type="button" class="btn btn-success" onclick="stompClient.send('/app/turnChange', {}, 'x');">ターンエンド</button>
+	</div>
+</body>
+</html>

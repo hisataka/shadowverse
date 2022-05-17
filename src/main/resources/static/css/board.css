@@ -1,0 +1,35 @@
+body {
+	background-color: rgba(255, 255, 255, 0.5);
+	background-image: url("/images/SBD.jpg");
+	background-blend-mode: lighten;
+	padding: 5px;
+	
+	font-family: "メイリオ";
+	font-size: 30px;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: middle;
+}
+
+h1 {
+	padding: 0.5em 0 0 0.5em;
+	text-align: left;
+	vertical-align: middle;
+	font-size: 45px;
+	font-weight: bold;
+}
+
+.card {
+	float: left;
+	margin-right: 2em;
+}
+
+#first {
+	border-width: 10px;
+	border-color: #4285F4;
+}
+
+#second {
+	border-width: 10px;
+	border-color: #ff6d01;
+}
